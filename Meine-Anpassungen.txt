@@ -1,0 +1,20 @@
+//#define Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN
+
+#define USE_PROBE_FOR_Z_HOMING
+
+#define BLTOUCH
+
+#define NOZZLE_TO_PROBE_OFFSET { -41, -10, -1.66 }
+
+#define XY_PROBE_SPEED 4000
+
+#define Y_BED_SIZE 228
+
+#define AUTO_BED_LEVELING_BILINEAR
+
+//#define MESH_BED_LEVELING
+
+//#define EXTRAPOLATE_BEYOND_GRID
+
+#define Z_SAFE_HOMING
+
