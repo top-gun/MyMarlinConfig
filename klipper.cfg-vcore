@@ -14,7 +14,7 @@ position_endstop: -1
 #   for the X, Y, and Z steppers on cartesian style printers.
 position_max: 300
 homing_speed: 50
-homing_retract_dist: 0
+
 
 # The stepper_y section is used to describe the stepper controlling
 # the Y axis in a cartesian robot. It has the same settings as the
@@ -29,7 +29,6 @@ position_endstop: -1
 position_min: -1
 position_max: 300
 homing_speed: 50
-homing_retract_dist: 0
 
 # The stepper_z section is used to describe the stepper controlling
 # the Z axis in a cartesian robot. It has the same settings as the
@@ -45,7 +44,7 @@ endstop_pin: probe:z_virtual_endstop
 position_min: -10 # The Z carriage may need to travel below the Z=0
                  # homing point if the bed has a significant tilt.
 position_max: 280
-homing_speed: 10
+homing_speed: 5
 
 [stepper_z1]
 step_pin: PD15
@@ -66,7 +65,7 @@ step_distance: 0.0025
 # as the heater_bed section (described below).
 [extruder]
 step_pin: PE14
-dir_pin: !PA0
+dir_pin: PA0
 enable_pin: !PC3
 step_distance: 0.0012
 nozzle_diameter: 0.4
@@ -89,7 +88,7 @@ pid_Kp: 22.2
 pid_Ki: 1.08
 pid_Kd: 114
 
-pressure_advance: 0.09
+pressure_advance: 0.07
 pressure_advance_smooth_time: 0.040
 
 
@@ -113,6 +112,16 @@ pin: PC8
 [heater_fan nozzle_cooling_fan]
 pin: PE5
 #max_power: 0.2
+
+# Micro-controller information.
+[mcu]
+#serial: /dev/serial/by-id/usb-Klipper_Klipper_firmware_12345-if00
+serial: /dev/serial/by-id/usb-Klipper_stm32f407xx_500043000A5052504B313720-if00
+#   The serial port to connect to the MCU. If unsure (or if it
+#   changes) see the "Where's my serial port?" section of the FAQ. The
+#   default is /dev/ttyS0
+baud: 250000
+#   The baud rate to use. The default is 250000.
 
 # The printer section controls high level printer settings.
 [printer]
@@ -208,7 +217,7 @@ pin_up_reports_not_triggered: True
 pin_up_touch_mode_reports_triggered: True
 x_offset: -35
 y_offset: -30
-z_offset: 3.93
+z_offset: 4.3
 speed: 5
 #   See the "probe" section for information on these parameters.
 
@@ -738,18 +747,17 @@ gcode:
 	INIT_TMC Stepper=stepper_z1
 	INIT_TMC Stepper=stepper_z2
 	G90   ; Uncomment these 2 lines to blindly lift the Z 2mm at start
-    G0 Z20 F500
+   G0 Z20 F500
 
-    SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.6 HOLDCURRENT=0.6
-    SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.6 HOLDCURRENT=0.6
+  SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.8 HOLDCURRENT=0.8
+  SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.8 HOLDCURRENT=0.8
     G28 X
-
-    SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.4 HOLDCURRENT=0.4
-    SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.4 HOLDCURRENT=0.4
-    G28 Y
+  SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.4 HOLDCURRENT=0.4
+  SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.4 HOLDCURRENT=0.4
  
-   SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.8 HOLDCURRENT=0.4
-   SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.8 HOLDCURRENT=0.4
+   G28 Y
+    SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.8 HOLDCURRENT=0.4
+    SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.8 HOLDCURRENT=0.4
 	G0 X151.21 Y118.99 F3000
 	G28 Z
 	G0 Z10 F500
@@ -1071,49 +1079,11 @@ pin: EXP1_1
 #*# [bed_mesh default]
 #*# version = 1
 #*# points =
-#*# 	  -0.303536, -0.396036, -0.413536, -0.348536, -0.191036
-#*# 	  -0.131036, -0.243536, -0.266036, -0.216036, -0.063536
-#*# 	  -0.011036, -0.106036, -0.136036, -0.103536, 0.028964
-#*# 	  0.096464, -0.006036, -0.048536, -0.016036, 0.093964
-#*# 	  0.183964, 0.061464, 0.016464, 0.038964, 0.153964
-#*# tension = 0.2
-#*# min_x = 40.0
-#*# algo = bicubic
-#*# y_count = 5
-#*# mesh_y_pps = 2
-#*# min_y = 40.0
-#*# x_count = 5
-#*# max_y = 240.0
-#*# mesh_x_pps = 2
-#*# max_x = 240.0
-#*#
-#*# [bed_mesh 65]
-#*# version = 1
-#*# points =
-#*# 	  -0.303536, -0.396036, -0.413536, -0.348536, -0.191036
-#*# 	  -0.131036, -0.243536, -0.266036, -0.216036, -0.063536
-#*# 	  -0.011036, -0.106036, -0.136036, -0.103536, 0.028964
-#*# 	  0.096464, -0.006036, -0.048536, -0.016036, 0.093964
-#*# 	  0.183964, 0.061464, 0.016464, 0.038964, 0.153964
-#*# tension = 0.2
-#*# min_x = 40.0
-#*# algo = bicubic
-#*# y_count = 5
-#*# mesh_y_pps = 2
-#*# min_y = 40.0
-#*# x_count = 5
-#*# max_y = 240.0
-#*# mesh_x_pps = 2
-#*# max_x = 240.0
-#*#
-#*# [bed_mesh 75]
-#*# version = 1
-#*# points =
-#*# 	  -0.303536, -0.396036, -0.413536, -0.348536, -0.191036
-#*# 	  -0.131036, -0.243536, -0.266036, -0.216036, -0.063536
-#*# 	  -0.011036, -0.106036, -0.136036, -0.103536, 0.028964
-#*# 	  0.096464, -0.006036, -0.048536, -0.016036, 0.093964
-#*# 	  0.183964, 0.061464, 0.016464, 0.038964, 0.153964
+#*# 	  -0.325349, -0.467849, -0.495349, -0.415349, -0.217849
+#*# 	  -0.172849, -0.302849, -0.337849, -0.270349, -0.075349
+#*# 	  -0.040349, -0.160349, -0.210349, -0.155349, 0.004651
+#*# 	  0.077151, -0.042849, -0.102849, -0.070349, 0.094651
+#*# 	  0.167151, 0.027151, -0.010349, 0.037151, 0.167151
 #*# tension = 0.2
 #*# min_x = 40.0
 #*# algo = bicubic
