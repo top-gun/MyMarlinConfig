@@ -1,6 +1,6 @@
 # v-core pro SKR Pro 1.2
-# date: 26.10.2020
-# pre-0.9
+# date: 7.11.20
+# Klipper 0.9.1
 # no calibration for input_shaper yet
 
 # The stepper_x section is used to describe the stepper controlling
@@ -30,7 +30,7 @@ step_distance: 0.0125
 endstop_pin: tmc2209_stepper_y:virtual_endstop
 position_endstop: -1
 position_min: -1
-position_max: 300
+position_max: 295
 homing_speed: 50
 homing_retract_dist: 0
 
@@ -127,18 +127,21 @@ serial: /dev/serial/by-id/usb-Klipper_stm32f407xx_500043000A5052504B313720-if00
 baud: 250000
 #   The baud rate to use. The default is 250000.
 
-
 # The printer section controls high level printer settings.
 [printer]
 kinematics: corexy
 max_velocity: 300
-max_accel: 1500
-max_accel_to_decel: 750
+max_accel: 2000
+max_accel_to_decel: 1000
 max_z_velocity: 10
 max_z_accel: 30
 square_corner_velocity: 5
 #buffer_time_high: 2
 
+[input_shaper]
+shaper_freq_x: 48.3
+shaper_freq_y: 46.6
+shaper_type: mzv
 
 ######################################################################
 # Bed probing hardware
@@ -154,17 +157,7 @@ square_corner_velocity: 5
 # the stepper_z config section.
 #[probe]
 #pin: PG8
-#   Probe detection pin. This parameter must be provided.
 #x_offset: -11.71
-#   The distance (in mm) between the probe and the nozzle along the
-#   x-axis. The default is 0.
-#y_offset: 25.01
-#   The distance (in mm) between the probe and the nozzle along the
-#   y-axis. The default is 0.
-#z_offset: 0
-#
-#   The distance (in mm) between the bed and the nozzle when the probe
-#   triggers. This parameter must be provided.
 #speed: 2
 #   Speed (in mm/s) of the Z axis when probing. The default is 5mm/s.
 #samples: 5
@@ -220,10 +213,10 @@ control_pin: PA1
 pin_move_time: 0.675
 pin_up_reports_not_triggered: True
 pin_up_touch_mode_reports_triggered: True
-x_offset: -35
-y_offset: -30
-z_offset: 3.93
-speed: 5
+x_offset: -31
+y_offset: -11
+z_offset: 3.98
+speed: 7
 #   See the "probe" section for information on these parameters.
 
 # Mesh Bed Leveling. One may define a [bed_mesh] config section
@@ -234,14 +227,6 @@ speed: 5
 # a [homing_override] section in printer.cfg to home toward the
 # center of the print area.
 #
-#  Visual Examples:
-#   rectangular bed, probe_count = 3,3:
-#               x---x---x (max_point)
-#               |
-#               x---x---x
-#                       |
-#   (min_point) x---x---x
-#
 
 [bed_mesh]
 speed: 100
@@ -250,22 +235,17 @@ speed: 100
 horizontal_move_z: 10
 #   The height (in mm) that the head should be commanded to move to
 #   just prior to starting a probe operation. The default is 5.
-#bed_radius:
-#   Defines the radius to probe for round beds.  Note that the radius
-#   is relative to the nozzle's origin, if using a probe be sure to
-#   account for its offset.  This parameter must be provided for round
-#   beds and omitted for rectangular beds.
-mesh_min: 40,40
+mesh_min: 20,20
 #   Defines the minimum x,y coodinate of the mesh for rectangular beds.  This
 #   coordinate is relative to the probe's location. This will be the first
 #   point probed, nearest to the origin. This parameter must be provided for
 #   rectangular beds.
-mesh_max:240,240
+mesh_max:265,260
 #   Defines the maximum x,y coordinate of the mesh for rectangular beds.
 #   Adheres to the same principle as mesh_min, however this will be the
 #   furthest point probed from the bed's origin. This parameter must be
 #   provided for rectangular beds.
-probe_count: 5,5
+probe_count: 7,7
 #   For rectangular beds, this is a comma separate pair of integer
 #   values (X,Y) defining the number of points to probe along each axis.
 #   A single value is also valid, in which case that value will be applied
@@ -319,9 +299,9 @@ bicubic_tension: .2
 # extended G-Code command becomes available.
 [z_tilt]
 z_positions:
-	0,150
-	150,300
-	300,150
+	-40,100
+	150,330
+	340,100
 #   A list of X,Y coordinates (one per line; subsequent lines
 #   indented) describing the location of each bed "pivot point". The
 #   "pivot point" is the point where the bed attaches to the given Z
@@ -330,16 +310,16 @@ z_positions:
 #   first entry corresponds to stepper_z, the second to stepper_z1,
 #   the third to stepper_z2, etc. This parameter must be provided.
 points:
-	50,100
-	180,280
-	280,100
+	70,60
+	185,280
+	270,60
 		
 #   A list of X,Y coordinates (one per line; subsequent lines
 #   indented) that should be probed during a Z_TILT_ADJUST command.
 #   Specify coordinates of the nozzle and be sure the probe is above
 #   the bed at the given nozzle coordinates. This parameter must be
 #   provided.
-speed: 200
+speed: 150
 #   The speed (in mm/s) of non-probing moves during the calibration.
 #   The default is 50.
 horizontal_move_z: 10
@@ -568,132 +548,14 @@ retry_tolerance: 0.02
 #   If set, the temperature will be reported in M105 queries using the
 #   given id. The default is to not report the temperature via M105.
 
-
-
-# Statically configured AD5206 digipots connected via SPI bus (one may
-# define any number of sections with an "ad5206" prefix).
-#[ad5206 my_digipot]
-#enable_pin:
-#   The pin corresponding to the AD5206 chip select line. This pin
-#   will be set to low at the start of SPI messages and raised to high
-#   after the message completes. This parameter must be provided.
-#spi_bus:
-#spi_speed:
-#spi_software_sclk_pin:
-#spi_software_mosi_pin:
-#spi_software_miso_pin:
-#   These optional parameters allow one to customize the SPI settings
-#   used to communicate with the chip.
-#channel_1:
-#channel_2:
-#channel_3:
-#channel_4:
-#channel_5:
-#channel_6:
-#   The value to statically set the given AD5206 channel to. This is
-#   typically set to a number between 0.0 and 1.0 with 1.0 being the
-#   highest resistance and 0.0 being the lowest resistance. However,
-#   the range may be changed with the 'scale' parameter (see below).
-#   If a channel is not specified then it is left unconfigured.
-#scale:
-#   This parameter can be used to alter how the 'channel_x' parameters
-#   are interpreted. If provided, then the 'channel_x' parameters
-#   should be between 0.0 and 'scale'. This may be useful when the
-#   AD5206 is used to set stepper voltage references. The 'scale' can
-#   be set to the equivalent stepper amperage if the AD5206 were at
-#   its highest resistance, and then the 'channel_x' parameters can be
-#   specified using the desired amperage value for the stepper. The
-#   default is to not scale the 'channel_x' parameters.
-
-
-# Statically configured MCP4451 digipot connected via I2C bus (one may
-# define any number of sections with an "mcp4451" prefix).
-#[mcp4451 my_digipot]
-#i2c_mcu: mcu
-#   The name of the micro-controller that the MCP4451 chip is
-#   connected to. The default is "mcu".
-#i2c_address:
-#   The i2c address that the chip is using on the i2c bus. This
-#   parameter must be provided.
-#wiper_0:
-#wiper_1:
-#wiper_2:
-#wiper_3:
-#   The value to statically set the given MCP4451 "wiper" to. This is
-#   typically set to a number between 0.0 and 1.0 with 1.0 being the
-#   highest resistance and 0.0 being the lowest resistance. However,
-#   the range may be changed with the 'scale' parameter (see
-#   below). If a wiper is not specified then it is left unconfigured.
-#scale:
-#   This parameter can be used to alter how the 'wiper_x' parameters
-#   are interpreted. If provided, then the 'wiper_x' parameters should
-#   be between 0.0 and 'scale'. This may be useful when the MCP4451 is
-#   used to set stepper voltage references. The 'scale' can be set to
-#   the equivalent stepper amperage if the MCP4451 were at its highest
-#   resistance, and then the 'wiper_x' parameters can be specified
-#   using the desired amperage value for the stepper. The default is
-#   to not scale the 'wiper_x' parameters.
-
-
-# Statically configured MCP4728 digital-to-analog converter connected
-# via I2C bus (one may define any number of sections with an "mcp4728"
-# prefix).
-#[mcp4728 my_dac]
-#i2c_mcu: mcu
-#   The name of the micro-controller that the MCP4451 chip is
-#   connected to. The default is "mcu".
-#i2c_address:
-#   The i2c address that the chip is using on the i2c bus. The default
-#   is zero.
-#channel_a:
-#channel_b:
-#channel_c:
-#channel_d:
-#   The value to statically set the given MCP4728 channel to. This is
-#   typically set to a number between 0.0 and 1.0 with 1.0 being the
-#   highest voltage and 0.0 being the lowest voltage. However, the
-#   range may be changed with the 'scale' parameter (see below). If a
-#   channel is not specified then it is left unconfigured.
-#scale:
-#   This parameter can be used to alter how the 'channel_x' parameters
-#   are interpreted. If provided, then the 'channel_x' parameters
-#   should be between 0.0 and 'scale'. This may be useful when the
-#   MCP4728 is used to set stepper voltage references. The 'scale' can
-#   be set to the equivalent stepper amperage if the MCP4728 were at
-#   its highest voltage, and then the 'channel_x' parameters can be
-#   specified using the desired amperage value for the stepper. The
-#   default is to not scale the 'channel_x' parameters.
-
-
-# Statically configured MCP4018 digipot connected via two gpio "bit
-# banging" pins (one may define any number of sections with an
-# "mcp4018" prefix).
-#[mcp4018 my_digipot]
-#scl_pin:
-#   The SCL "clock" pin. This parameter must be provided.
-#sda_pin:
-#   The SDA "data" pin. This parameter must be provided.
-#wiper:
-#   The value to statically set the given MCP4018 "wiper" to. This is
-#   typically set to a number between 0.0 and 1.0 with 1.0 being the
-#   highest resistance and 0.0 being the lowest resistance. However,
-#   the range may be changed with the 'scale' parameter (see
-#   below). This parameter must be provided.
-#scale:
-#   This parameter can be used to alter how the 'wiper' parameter is
-#   interpreted. If provided, then the 'wiper' parameter should be
-#   between 0.0 and 'scale'. This may be useful when the MCP4018 is
-#   used to set stepper voltage references. The 'scale' can be set to
-#   the equivalent stepper amperage if the MCP4018 is at its highest
-#   resistance, and then the 'wiper' parameter can be specified using
-#   the desired amperage value for the stepper. The default is to not
-#   scale the 'wiper' parameter.
-
+# Support for gcode arc (G2/G3) commands.
+[gcode_arcs]
+resolution: 1.0
 
 [tmc2209 stepper_x]
 uart_pin: PC13
 microsteps: 16
-run_current: 0.900
+run_current: 1.2
 hold_current: 0.500
 stealthchop_threshold: 250
 diag_pin: PB10
@@ -702,7 +564,7 @@ driver_SGTHRS: 40
 [tmc2209 stepper_y]
 uart_pin: PE3
 microsteps: 16
-run_current: 0.900
+run_current: 1.2
 hold_current: 0.500
 stealthchop_threshold: 250
 diag_pin: PE12
@@ -754,16 +616,16 @@ gcode:
 	G90   ; Uncomment these 2 lines to blindly lift the Z 2mm at start
     G0 Z20 F500
 
-    SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.6 HOLDCURRENT=0.6
-    SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.6 HOLDCURRENT=0.6
+    SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.5 HOLDCURRENT=0.6
+    SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.5 HOLDCURRENT=0.6
     G28 X
 
     SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.4 HOLDCURRENT=0.4
     SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.4 HOLDCURRENT=0.4
     G28 Y
  
-   SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.8 HOLDCURRENT=0.4
-   SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.8 HOLDCURRENT=0.4
+   SET_TMC_CURRENT STEPPER=stepper_x CURRENT=1.2 HOLDCURRENT=0.5
+   SET_TMC_CURRENT STEPPER=stepper_y CURRENT=1.2 HOLDCURRENT=0.5
 	G0 X151.21 Y118.99 F3000
 	G28 Z
 	G0 Z10 F500
@@ -803,17 +665,14 @@ enable_force_move: true
 # Optional G-Code features
 ######################################################################
 
-# A virtual sdcard may be useful if the host machine is not fast
-# enough to run OctoPrint well. It allows the Klipper host software to
-# directly print gcode files stored in a directory on the host using
-# standard sdcard G-Code commands (eg, M24).
-#[virtual_sdcard]
-#path: ~/.octoprint/uploads/
-#   The path of the local directory on the host machine to look for
-#   g-code files. This is a read-only directory (sdcard file writes
-#   are not supported). One may point this to OctoPrint's upload
-#   directory (generally ~/.octoprint/uploads/ ). This parameter must
-#   be provided.
+
+[gcode_macro G34]
+gcode:
+    # Home the extruder and bed
+    G28
+    # Trim the bed
+    Z_Tilt_Adjust
+
 
 [board_pins]
 aliases:
@@ -1085,56 +944,83 @@ pin: EXP1_1
 #*# [bed_mesh default]
 #*# version = 1
 #*# points =
-#*# 	  -0.303536, -0.396036, -0.413536, -0.348536, -0.191036
-#*# 	  -0.131036, -0.243536, -0.266036, -0.216036, -0.063536
-#*# 	  -0.011036, -0.106036, -0.136036, -0.103536, 0.028964
-#*# 	  0.096464, -0.006036, -0.048536, -0.016036, 0.093964
-#*# 	  0.183964, 0.061464, 0.016464, 0.038964, 0.153964
+#*# 	  0.115000, -0.097500, -0.167500, -0.165000, -0.132500, -0.040000, 0.100000
+#*# 	  0.232500, 0.032500, -0.042500, -0.070000, -0.040000, 0.042500, 0.190000
+#*# 	  0.247500, 0.062500, 0.015000, 0.010000, 0.035000, 0.105000, 0.255000
+#*# 	  0.290000, 0.147500, 0.082500, 0.055000, 0.070000, 0.147500, 0.295000
+#*# 	  0.267500, 0.157500, 0.102500, 0.115000, 0.125000, 0.195000, 0.350000
+#*# 	  0.347500, 0.242500, 0.160000, 0.107500, 0.115000, 0.180000, 0.305000
+#*# 	  0.365000, 0.252500, 0.170000, 0.707500, 0.122500, 0.210000, 0.330000
 #*# tension = 0.2
-#*# min_x = 40.0
+#*# min_x = 20.0
 #*# algo = bicubic
-#*# y_count = 5
+#*# y_count = 7
 #*# mesh_y_pps = 2
-#*# min_y = 40.0
-#*# x_count = 5
-#*# max_y = 240.0
+#*# min_y = 20.0
+#*# x_count = 7
+#*# max_y = 260.0
 #*# mesh_x_pps = 2
-#*# max_x = 240.0
+#*# max_x = 264.98
 #*#
 #*# [bed_mesh 65]
 #*# version = 1
 #*# points =
-#*# 	  -0.303536, -0.396036, -0.413536, -0.348536, -0.191036
-#*# 	  -0.131036, -0.243536, -0.266036, -0.216036, -0.063536
-#*# 	  -0.011036, -0.106036, -0.136036, -0.103536, 0.028964
-#*# 	  0.096464, -0.006036, -0.048536, -0.016036, 0.093964
-#*# 	  0.183964, 0.061464, 0.016464, 0.038964, 0.153964
+#*# 	0.022903, -0.197097, -0.279597, -0.279597, -0.244597, -0.124597, 0.050403
+#*# 	0.145403, -0.054597, -0.159597, -0.179597, -0.117097, -0.002097, 0.147903
+#*# 	0.197903, -0.002097, -0.069597, -0.074597, -0.034597, 0.070403, 0.227903
+#*# 	0.255403, 0.117903, 0.037903, 0.020403, 0.037903, 0.132903, 0.280403
+#*# 	0.267903, 0.137903, 0.017903, 0.002903, 0.032903, 0.150403, 0.315403
+#*# 	0.272903, 0.117903, 0.025403, 0.012903, 0.045403, 0.162903, 0.322903
+#*# 	0.275403, 0.082903, 0.022903, -0.004597, 0.045403, 0.162903, 0.312903
 #*# tension = 0.2
-#*# min_x = 40.0
+#*# min_x = 20.0
 #*# algo = bicubic
-#*# y_count = 5
+#*# y_count = 7
 #*# mesh_y_pps = 2
-#*# min_y = 40.0
-#*# x_count = 5
-#*# max_y = 240.0
+#*# min_y = 20.0
+#*# x_count = 7
+#*# max_y = 260.0
 #*# mesh_x_pps = 2
-#*# max_x = 240.0
+#*# max_x = 264.98
 #*#
 #*# [bed_mesh 75]
 #*# version = 1
 #*# points =
-#*# 	  -0.303536, -0.396036, -0.413536, -0.348536, -0.191036
-#*# 	  -0.131036, -0.243536, -0.266036, -0.216036, -0.063536
-#*# 	  -0.011036, -0.106036, -0.136036, -0.103536, 0.028964
-#*# 	  0.096464, -0.006036, -0.048536, -0.016036, 0.093964
-#*# 	  0.183964, 0.061464, 0.016464, 0.038964, 0.153964
+#*# 	0.022903, -0.197097, -0.279597, -0.279597, -0.244597, -0.124597, 0.050403
+#*# 	0.145403, -0.054597, -0.159597, -0.179597, -0.117097, -0.002097, 0.147903
+#*# 	0.197903, -0.002097, -0.069597, -0.074597, -0.034597, 0.070403, 0.227903
+#*# 	0.255403, 0.117903, 0.037903, 0.020403, 0.037903, 0.132903, 0.280403
+#*# 	0.267903, 0.137903, 0.017903, 0.002903, 0.032903, 0.150403, 0.315403
+#*# 	0.272903, 0.117903, 0.025403, 0.012903, 0.045403, 0.162903, 0.322903
+#*# 	0.275403, 0.082903, 0.022903, -0.004597, 0.045403, 0.162903, 0.312903
 #*# tension = 0.2
-#*# min_x = 40.0
+#*# min_x = 20.0
 #*# algo = bicubic
-#*# y_count = 5
+#*# y_count = 7
 #*# mesh_y_pps = 2
-#*# min_y = 40.0
-#*# x_count = 5
-#*# max_y = 240.0
+#*# min_y = 20.0
+#*# x_count = 7
+#*# max_y = 260.0
 #*# mesh_x_pps = 2
-#*# max_x = 240.0
+#*# max_x = 264.98
+#*#
+#*# [bed_mesh 105]
+#*# version = 1
+#*# points =
+#*# 	  0.115000, -0.097500, -0.167500, -0.165000, -0.132500, -0.040000, 0.100000
+#*# 	  0.232500, 0.032500, -0.042500, -0.070000, -0.040000, 0.042500, 0.190000
+#*# 	  0.247500, 0.062500, 0.015000, 0.010000, 0.035000, 0.105000, 0.255000
+#*# 	  0.290000, 0.147500, 0.082500, 0.055000, 0.070000, 0.147500, 0.295000
+#*# 	  0.267500, 0.157500, 0.102500, 0.115000, 0.125000, 0.195000, 0.350000
+#*# 	  0.347500, 0.242500, 0.160000, 0.107500, 0.115000, 0.180000, 0.305000
+#*# 	  0.365000, 0.252500, 0.170000, 0.707500, 0.122500, 0.210000, 0.330000
+#*# tension = 0.2
+#*# min_x = 20.0
+#*# algo = bicubic
+#*# y_count = 7
+#*# mesh_y_pps = 2
+#*# min_y = 20.0
+#*# x_count = 7
+#*# max_y = 260.0
+#*# mesh_x_pps = 2
+#*# max_x = 264.98
