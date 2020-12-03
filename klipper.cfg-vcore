@@ -1,7 +1,7 @@
 # v-core pro SKR Pro 1.2
-# date: 7.11.20
+# date: 3.12.20
 # Klipper 0.9.1
-# no calibration for input_shaper yet
+#
 
 # The stepper_x section is used to describe the stepper controlling
 # the X axis in a cartesian robot.
@@ -93,8 +93,21 @@ pid_Ki: 1.08
 pid_Kd: 114
 
 pressure_advance: 0.09
+# PA PLA@0.4: 0.09 (non-calibrated)
+# GITD PLA@0.6: 0.045 (calibrated)
 pressure_advance_smooth_time: 0.040
 
+[heater_generic my_generic_heater]
+gcode_id: C
+heater_pin: PD14 # Heat1
+sensor_type: NTC 100K beta 3950
+sensor_pin: PF5 # T2
+control: pid
+pid_Kp: 22.2
+pid_Ki: 1.08
+pid_Kd: 114
+min_temp: 0
+max_temp: 250
 
 [heater_bed]
 heater_pin: PD12
@@ -104,7 +117,6 @@ control: pid
 pid_Kp: 22.2
 pid_Ki: 1.08
 pid_Kd: 114
-
 min_temp: 0
 max_temp: 120
 
@@ -119,7 +131,6 @@ pin: PE5
 
 # Micro-controller information.
 [mcu]
-#serial: /dev/serial/by-id/usb-Klipper_Klipper_firmware_12345-if00
 serial: /dev/serial/by-id/usb-Klipper_stm32f407xx_500043000A5052504B313720-if00
 #   The serial port to connect to the MCU. If unsure (or if it
 #   changes) see the "Where's my serial port?" section of the FAQ. The
@@ -133,7 +144,7 @@ kinematics: corexy
 max_velocity: 300
 max_accel: 2000
 max_accel_to_decel: 1000
-max_z_velocity: 10
+max_z_velocity: 15
 max_z_accel: 30
 square_corner_velocity: 5
 #buffer_time_high: 2
@@ -206,7 +217,6 @@ shaper_type: mzv
 # "probe:z_virtual_endstop" then do not define a position_endstop in
 # the stepper_z config section.
 
-
 [bltouch]
 sensor_pin: ^PA2
 control_pin: PA1
@@ -215,7 +225,7 @@ pin_up_reports_not_triggered: True
 pin_up_touch_mode_reports_triggered: True
 x_offset: -31
 y_offset: -11
-z_offset: 3.98
+z_offset: 4.29
 speed: 7
 #   See the "probe" section for information on these parameters.
 
@@ -278,9 +288,7 @@ mesh_pps: 2,2
 #   point. The user may enter a single value which will be applied
 #   to both axes.  Default is 2,2.
 algorithm: bicubic
-#   The interpolation algorithm to use. May be either "lagrange"
-#   or "bicubic". This option will not affect 3x3 grids, which
-#   are forced to use lagrange sampling.  Default is lagrange.
+#
 bicubic_tension: .2
 #   When using the bicubic algorithm the tension parameter above
 #   may be applied to change the amount of slope interpolated.
@@ -291,7 +299,7 @@ bicubic_tension: .2
 #   this parameter produces a mesh relative to the probed z position
 #   at the provided index.
 
-
+[skew_correction]
 
 # Multiple Z stepper tilt adjustment. This feature enables independent
 # adjustment of multiple z steppers (see stepper_z1 section below) to
@@ -335,42 +343,6 @@ retry_tolerance: 0.02
 #   minimum value for the range of probed points which you can learn
 #   by observing command output.
 
-
-
-# Heater and temperature sensor verification. Heater verification is
-# automatically enabled for each heater that is configured on the
-# printer. Use verify_heater sections to change the default settings.
-#[verify_heater heater_config_name]
-#max_error: 120
-#   The maximum "cumulative temperature error" before raising an
-#   error. Smaller values result in stricter checking and larger
-#   values allow for more time before an error is reported.
-#   Specifically, the temperature is inspected once a second and if it
-#   is close to the target temperature then an internal "error
-#   counter" is reset; otherwise, if the temperature is below the
-#   target range then the counter is increased by the amount the
-#   reported temperature differs from that range. Should the counter
-#   exceed this "max_error" then an error is raised. The default is
-#   120.
-#check_gain_time:
-#   This controls heater verification during initial heating.  Smaller
-#   values result in stricter checking and larger values allow for
-#   more time before an error is reported. Specifically, during
-#   initial heating, as long as the heater increases in temperature
-#   within this time frame (specified in seconds) then the internal
-#   "error counter" is reset. The default is 20 seconds for extruders
-#   and 60 seconds for heater_bed.
-#hysteresis: 5
-#   The maximum temperature difference (in Celsius) to a target
-#   temperature that is considered in range of the target. This
-#   controls the max_error range check. It is rare to customize this
-#   value. The default is 5.
-#heating_gain: 2
-#   The minimum temperature (in Celsius) that the heater must increase
-#   by during the check_gain_time check. It is rare to customize this
-#   value. The default is 2.
-
-
 # Idle timeout. An idle timeout is automatically enabled - add an
 # explicit idle_timeout config section to change the default settings.
 #[idle_timeout]
@@ -383,87 +355,14 @@ retry_tolerance: 0.02
 #   commands. The default is 600 seconds.
 
 
-# Multi-stepper axes. On a cartesian style printer, the stepper
-# controlling a given axis may have additional config blocks defining
-# steppers that should be stepped in concert with the primary
-# stepper. One may define any number of sections with a numeric suffix
-# starting at 1 (for example, "stepper_z1", "stepper_z2", etc.).
-#   See the example.cfg for the definition of the above parameters.
-#endstop_pin: ^ar19
-#   If an endstop_pin is defined for the additional stepper then the
-#   stepper will home until the endstop is triggered. Otherwise, the
-#   stepper will home until the endstop on the primary stepper for the
-#   axis is triggered.
-
-
-# Stepper phase adjusted endstops. To use this feature, define a
-# config section with an "endstop_phase" prefix followed by the name
-# of the corresponding stepper config section (for example,
-# "[endstop_phase stepper_z]"). This feature can improve the accuracy
-# of endstop switches. Add a bare "[endstop_phase]" declaration to
-# enable the ENDSTOP_PHASE_CALIBRATE command.
-#[endstop_phase stepper_x]
-#phases:
-#   This specifies the number of phases of the given stepper motor
-#   driver (which is the number of micro-steps multiplied by four).
-#   This setting is automatically determined if one uses TMC2130,
-#   TMC2208, TMC2224 or TMC2660 drivers with run-time configuration.
-#   Otherwise, this parameter must be provided.
-#endstop_accuracy: 0.200
-#   Sets the expected accuracy (in mm) of the endstop. This represents
-#   the maximum error distance the endstop may trigger (eg, if an
-#   endstop may occasionally trigger 100um early or up to 100um late
-#   then set this to 0.200 for 200um). The default is
-#   phases*step_distance.
-#endstop_phase:
-#   This specifies the phase of the stepper motor driver to expect
-#   when hitting the endstop. Only set this value if one is sure the
-#   stepper motor driver is reset every time the mcu is reset. If this
-#   is not set, then the stepper phase will be detected on the first
-#   home and that phase will be used on all subsequent homes.
-#endstop_align_zero: False
-#   If true then the position_endstop of the axis will effectively be
-#   modified so that the zero position for the axis occurs at a full
-#   step on the stepper motor. (If used on the Z axis and the print
-#   layer height is a multiple of a full step distance then every
-#   layer will occur on a full step.) The default is False.
-
-
-# Heater cooling fans (one may define any number of sections with a
-# "heater_fan" prefix). A "heater fan" is a fan that will be enabled
-# whenever its associated heater is active. By default, a heater_fan
-# has a shutdown_speed equal to max_power.
-#[heater_fan my_nozzle_fan]
-#pin:
-#max_power:
-#shutdown_speed:
-#cycle_time:
-#hardware_pwm:
-#kick_start_time:
-#   See the "fan" section in example.cfg for a description of the
-#   above parameters.
-#heater: extruder
-#   Name of the config section defining the heater that this fan is
-#   associated with. If a comma separated list of heater names is
-#   provided here, then the fan will be enabled when any of the given
-#   heaters are enabled. The default is "extruder".
-#heater_temp: 50.0
-#   A temperature (in Celsius) that the heater must drop below before
-#   the fan is disabled. The default is 50 Celsius.
-#fan_speed: 1.0
-#   The fan speed (expressed as a value from 0.0 to 1.0) that the fan
-#   will be set to when its associated heater is enabled. The default
-#   is 1.0
-
-
 # Controller cooling fan (one may define any number of sections with a
 # "controller_fan" prefix). A "controller fan" is a fan that will be
 # enabled whenever its associated heater or any configured stepper
 # driver is active. The fan will stop, whenever an idle_timeout is
 # reached to ensure no overheating will occur after deactivating a
 # watched component.
-#[controller_fan my_controller_fan]
-#pin:
+[controller_fan my_controller_fan]
+pin:  PE6
 #max_power:
 #shutdown_speed:
 #cycle_time:
@@ -471,21 +370,11 @@ retry_tolerance: 0.02
 #kick_start_time:
 #   See the "fan" section in example.cfg for a description of the
 #   above parameters.
-#idle_timeout:
-#   The ammount of time (in seconds) after a stepper driver or heater
-#   was active and the fan should be kept running. The default
-#   is 30 seconds.
 #idle_speed:
 #   The fan speed (expressed as a value from 0.0 to 1.0) that the fan
 #   will be set to when a heater or stepper driver was active and before
 #   the idle_timeout is reached. This must be greater or equal
 #   max_power. The default is max_power
-#heater:
-#   Name of the config section defining the heater that this fan is
-#   associated with. If a comma separated list of heater names is
-#   provided here, then the fan will be enabled when any of the given
-#   heaters are enabled. The default is "extruder".
-
 
 # Temperature-triggered cooling fans (one may define any number of
 # sections with a "temperature_fan" prefix). A "temperature fan" is a
@@ -559,7 +448,7 @@ run_current: 1.2
 hold_current: 0.500
 stealthchop_threshold: 250
 diag_pin: PB10
-driver_SGTHRS: 40
+driver_SGTHRS: 60
 
 [tmc2209 stepper_y]
 uart_pin: PE3
@@ -568,7 +457,7 @@ run_current: 1.2
 hold_current: 0.500
 stealthchop_threshold: 250
 diag_pin: PE12
-driver_SGTHRS: 40
+driver_SGTHRS: 60
 
 [tmc2209 stepper_z]
 uart_pin: PE1
@@ -582,7 +471,7 @@ uart_pin: PD4
 microsteps: 16
 run_current: 0.800
 hold_current: 0.500
-stealthchop_threshold: 5
+stealthchop_threshold: 0
 
 [tmc2209 stepper_z1]
 uart_pin: PD1
@@ -598,7 +487,46 @@ run_current: 0.800
 hold_current: 0.500
 stealthchop_threshold: 30
 
+[virtual_sdcard]
+path: ~/gcode_files
 
+[display_status]
+
+[pause_resume]
+
+[gcode_macro PAUSE]
+rename_existing: BASE_PAUSE
+default_parameter_X: 30    # edit to your preferred park position
+default_parameter_Y: 0    # edit to your preferred park position
+default_parameter_Z: 10     # edit to your preferred park position
+default_parameter_E: 0.6      # edit to your preferred retract length
+gcode:
+    SAVE_GCODE_STATE NAME=PAUSE_state
+    BASE_PAUSE
+    G91
+    G1 E-{E} F2100
+    G1 Z{Z}
+    G90
+    G1 X{X} Y{Y} F6000
+
+[gcode_macro RESUME]
+rename_existing: BASE_RESUME
+default_parameter_E: 0.6      # edit to your preferred retract length
+gcode:
+    G91
+    G1 E{E} F2100
+    G90
+    RESTORE_GCODE_STATE NAME=PAUSE_state MOVE=1
+    BASE_RESUME
+
+[gcode_macro CANCEL_PRINT]
+rename_existing: BASE_CANCEL_PRINT
+gcode:
+    TURN_OFF_HEATERS
+    CLEAR_PAUSE
+    SDCARD_RESET_FILE
+    BASE_CANCEL_PRINT
+    
 
 # Homing override. One may use this mechanism to run a series of
 # g-code commands in place of a G28 found in the normal g-code input.
@@ -616,8 +544,8 @@ gcode:
 	G90   ; Uncomment these 2 lines to blindly lift the Z 2mm at start
     G0 Z20 F500
 
-    SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.5 HOLDCURRENT=0.6
-    SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.5 HOLDCURRENT=0.6
+    SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.5 HOLDCURRENT=0.5
+    SET_TMC_CURRENT STEPPER=stepper_y CURRENT=0.5 HOLDCURRENT=0.5
     G28 X
 
     SET_TMC_CURRENT STEPPER=stepper_x CURRENT=0.4 HOLDCURRENT=0.4
@@ -944,13 +872,13 @@ pin: EXP1_1
 #*# [bed_mesh default]
 #*# version = 1
 #*# points =
-#*# 	  0.115000, -0.097500, -0.167500, -0.165000, -0.132500, -0.040000, 0.100000
-#*# 	  0.232500, 0.032500, -0.042500, -0.070000, -0.040000, 0.042500, 0.190000
-#*# 	  0.247500, 0.062500, 0.015000, 0.010000, 0.035000, 0.105000, 0.255000
-#*# 	  0.290000, 0.147500, 0.082500, 0.055000, 0.070000, 0.147500, 0.295000
-#*# 	  0.267500, 0.157500, 0.102500, 0.115000, 0.125000, 0.195000, 0.350000
-#*# 	  0.347500, 0.242500, 0.160000, 0.107500, 0.115000, 0.180000, 0.305000
-#*# 	  0.365000, 0.252500, 0.170000, 0.707500, 0.122500, 0.210000, 0.330000
+#*# 	  0.240000, 0.020000, -0.122500, -0.145000, -0.075000, 0.060000, 0.255000
+#*# 	  0.297500, 0.110000, -0.015000, -0.037500, -0.007500, 0.127500, 0.317500
+#*# 	  0.300000, 0.137500, 0.040000, 0.020000, 0.077500, 0.200000, 0.357500
+#*# 	  0.327500, 0.207500, 0.125000, 0.105000, 0.140000, 0.247500, 0.385000
+#*# 	  0.320000, 0.217500, 0.152500, 0.145000, 0.187500, 0.282500, 0.410000
+#*# 	  0.320000, 0.247500, 0.185000, 0.177500, 0.215000, 0.310000, 0.427500
+#*# 	  0.317500, 0.242500, 0.195000, 0.202500, 0.240000, 0.325000, 0.437500
 #*# tension = 0.2
 #*# min_x = 20.0
 #*# algo = bicubic
@@ -965,13 +893,13 @@ pin: EXP1_1
 #*# [bed_mesh 65]
 #*# version = 1
 #*# points =
-#*# 	0.022903, -0.197097, -0.279597, -0.279597, -0.244597, -0.124597, 0.050403
-#*# 	0.145403, -0.054597, -0.159597, -0.179597, -0.117097, -0.002097, 0.147903
-#*# 	0.197903, -0.002097, -0.069597, -0.074597, -0.034597, 0.070403, 0.227903
-#*# 	0.255403, 0.117903, 0.037903, 0.020403, 0.037903, 0.132903, 0.280403
-#*# 	0.267903, 0.137903, 0.017903, 0.002903, 0.032903, 0.150403, 0.315403
-#*# 	0.272903, 0.117903, 0.025403, 0.012903, 0.045403, 0.162903, 0.322903
-#*# 	0.275403, 0.082903, 0.022903, -0.004597, 0.045403, 0.162903, 0.312903
+#*# 	0.162500, -0.082500, -0.177500, -0.205000, -0.150000, -0.012500, 0.185000
+#*# 	0.317500, 0.125000, -0.020000, -0.082500, -0.055000, 0.075000, 0.262500
+#*# 	0.372500, 0.145000, 0.025000, -0.002500, 0.037500, 0.165000, 0.330000
+#*# 	0.405000, 0.235000, 0.112500, 0.060000, 0.080000, 0.205000, 0.385000
+#*# 	0.437500, 0.242500, 0.132500, 0.102500, 0.122500, 0.257500, 0.410000
+#*# 	0.465000, 0.305000, 0.187500, 0.132500, 0.152500, 0.260000, 0.420000
+#*# 	0.492500, 0.287500, 0.162500, 0.125000, 0.160000, 0.282500, 0.442500
 #*# tension = 0.2
 #*# min_x = 20.0
 #*# algo = bicubic
@@ -986,13 +914,13 @@ pin: EXP1_1
 #*# [bed_mesh 75]
 #*# version = 1
 #*# points =
-#*# 	0.022903, -0.197097, -0.279597, -0.279597, -0.244597, -0.124597, 0.050403
-#*# 	0.145403, -0.054597, -0.159597, -0.179597, -0.117097, -0.002097, 0.147903
-#*# 	0.197903, -0.002097, -0.069597, -0.074597, -0.034597, 0.070403, 0.227903
-#*# 	0.255403, 0.117903, 0.037903, 0.020403, 0.037903, 0.132903, 0.280403
-#*# 	0.267903, 0.137903, 0.017903, 0.002903, 0.032903, 0.150403, 0.315403
-#*# 	0.272903, 0.117903, 0.025403, 0.012903, 0.045403, 0.162903, 0.322903
-#*# 	0.275403, 0.082903, 0.022903, -0.004597, 0.045403, 0.162903, 0.312903
+#*# 	0.162500, -0.082500, -0.177500, -0.205000, -0.150000, -0.012500, 0.185000
+#*# 	0.317500, 0.125000, -0.020000, -0.082500, -0.055000, 0.075000, 0.262500
+#*# 	0.372500, 0.145000, 0.025000, -0.002500, 0.037500, 0.165000, 0.330000
+#*# 	0.405000, 0.235000, 0.112500, 0.060000, 0.080000, 0.205000, 0.385000
+#*# 	0.437500, 0.242500, 0.132500, 0.102500, 0.122500, 0.257500, 0.410000
+#*# 	0.465000, 0.305000, 0.187500, 0.132500, 0.152500, 0.260000, 0.420000
+#*# 	0.492500, 0.287500, 0.162500, 0.125000, 0.160000, 0.282500, 0.442500
 #*# tension = 0.2
 #*# min_x = 20.0
 #*# algo = bicubic
@@ -1007,13 +935,34 @@ pin: EXP1_1
 #*# [bed_mesh 105]
 #*# version = 1
 #*# points =
-#*# 	  0.115000, -0.097500, -0.167500, -0.165000, -0.132500, -0.040000, 0.100000
-#*# 	  0.232500, 0.032500, -0.042500, -0.070000, -0.040000, 0.042500, 0.190000
-#*# 	  0.247500, 0.062500, 0.015000, 0.010000, 0.035000, 0.105000, 0.255000
-#*# 	  0.290000, 0.147500, 0.082500, 0.055000, 0.070000, 0.147500, 0.295000
-#*# 	  0.267500, 0.157500, 0.102500, 0.115000, 0.125000, 0.195000, 0.350000
-#*# 	  0.347500, 0.242500, 0.160000, 0.107500, 0.115000, 0.180000, 0.305000
-#*# 	  0.365000, 0.252500, 0.170000, 0.707500, 0.122500, 0.210000, 0.330000
+#*# 	0.115000, -0.090000, -0.170000, -0.200000, -0.160000, -0.035000, 0.140000
+#*# 	0.225000, 0.025000, -0.060000, -0.100000, -0.075000, 0.040000, 0.200000
+#*# 	0.237500, 0.060000, 0.025000, -0.017500, 0.020000, 0.137500, 0.265000
+#*# 	0.337500, 0.150000, 0.102500, 0.032500, 0.080000, 0.160000, 0.310000
+#*# 	0.290000, 0.145000, 0.075000, 0.062500, 0.095000, 0.170000, 0.320000
+#*# 	0.372500, 0.237500, 0.127500, 0.072500, 0.102500, 0.202500, 0.320000
+#*# 	0.390000, 0.230000, 0.145000, 0.127500, 0.125000, 0.212500, 0.345000
+#*# tension = 0.2
+#*# min_x = 20.0
+#*# algo = bicubic
+#*# y_count = 7
+#*# mesh_y_pps = 2
+#*# min_y = 20.0
+#*# x_count = 7
+#*# max_y = 260.0
+#*# mesh_x_pps = 2
+#*# max_x = 264.98
+#*#
+#*# [bed_mesh Nylon]
+#*# version = 1
+#*# points =
+#*# 	  0.240000, 0.020000, -0.122500, -0.145000, -0.075000, 0.060000, 0.255000
+#*# 	  0.297500, 0.110000, -0.015000, -0.037500, -0.007500, 0.127500, 0.317500
+#*# 	  0.300000, 0.137500, 0.040000, 0.020000, 0.077500, 0.200000, 0.357500
+#*# 	  0.327500, 0.207500, 0.125000, 0.105000, 0.140000, 0.247500, 0.385000
+#*# 	  0.320000, 0.217500, 0.152500, 0.145000, 0.187500, 0.282500, 0.410000
+#*# 	  0.320000, 0.247500, 0.185000, 0.177500, 0.215000, 0.310000, 0.427500
+#*# 	  0.317500, 0.242500, 0.195000, 0.202500, 0.240000, 0.325000, 0.437500
 #*# tension = 0.2
 #*# min_x = 20.0
 #*# algo = bicubic
